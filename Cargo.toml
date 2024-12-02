@@ -3,6 +3,10 @@ name = "mcp-client-rs"
 version = "0.1.0"
 edition = "2021"
 
+[[example]]
+name = "initialize_and_call_tools"
+path = "examples/initialize_and_call_tools.rs"
+
 [dependencies]
 smol = "2.0.2"
 serde = { version = "1.0", features = ["derive"] }

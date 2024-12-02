@@ -57,7 +57,7 @@ pub struct ListToolsResponse {
 pub struct Tool {
     pub name: String,
     pub description: String,
-    pub parameters: serde_json::Value,
+    pub inputSchema: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize)]

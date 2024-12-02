@@ -16,101 +16,6 @@ use std::{
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::Mutex;
 
-impl Protocol {
-    pub fn capable(&self, capability: ServerCapability) -> bool {
-        if let Some(caps) = &self.capabilities {
-            match capability {
-                ServerCapability::Experimental => caps.experimental.is_some(),
-                ServerCapability::Logging => caps.logging.is_some(),
-                ServerCapability::Prompts => caps.prompts.is_some(),
-                ServerCapability::Resources => caps.resources.is_some(),
-                ServerCapability::Tools => caps.tools.is_some(),
-                ServerCapability::Sampling => caps.sampling.is_some(),
-            }
-        } else {
-            false
-        }
-    }
-
-    fn check_capability(&self, capability: ServerCapability) -> Result<(), ClientError> {
-        if self.capable(capability) {
-            Ok(())
-        } else {
-            Err(ClientError::CapabilityError(format!(
-                "Server does not support {:?} capability",
-                capability
-            )))
-        }
-    }
-
-    pub async fn list_prompts(&self) -> Result<Vec<Prompt>, ClientError> {
-        self.check_capability(ServerCapability::Prompts)?;
-        let request = JsonRpcRequest::new(self.next_id(), RequestType::PromptsList, json!({}));
-        let response = self.send_request(request).await?;
-        if let ResponseContent::Success { result } = response.response {
-            serde_json::from_value(result).map_err(|e| {
-                ClientError::PromptError(format!("Failed to parse prompts list: {}", e))
-            })
-        } else {
-            Err(ClientError::PromptError(
-                "Failed to list prompts".to_string(),
-            ))
-        }
-    }
-
-    pub async fn list_resources(&self) -> Result<ResourcesListResponse, ClientError> {
-        self.check_capability(ServerCapability::Resources)?;
-        let request = JsonRpcRequest::new(self.next_id(), RequestType::ResourcesList, json!({}));
-        let response = self.send_request(request).await?;
-        if let ResponseContent::Success { result } = response.response {
-            serde_json::from_value(result).map_err(|e| {
-                ClientError::ResourceError(format!("Failed to parse resources list: {}", e))
-            })
-        } else {
-            Err(ClientError::ResourceError(
-                "Failed to list resources".to_string(),
-            ))
-        }
-    }
-
-    pub async fn read_resources(
-        &self,
-        uris: Vec<String>,
-    ) -> Result<ResourcesReadResponse, ClientError> {
-        self.check_capability(ServerCapability::Resources)?;
-        let request = JsonRpcRequest::new(
-            self.next_id(),
-            RequestType::ResourcesRead,
-            json!({ "uris": uris }),
-        );
-        let response = self.send_request(request).await?;
-        if let ResponseContent::Success { result } = response.response {
-            serde_json::from_value(result).map_err(|e| {
-                ClientError::ResourceError(format!(
-                    "Failed to parse read resources response: {}",
-                    e
-                ))
-            })
-        } else {
-            Err(ClientError::ResourceError(
-                "Failed to read resources".to_string(),
-            ))
-        }
-    }
-
-    pub async fn list_tools(&self) -> Result<ListToolsResponse, ClientError> {
-        self.check_capability(ServerCapability::Tools)?;
-        let request = JsonRpcRequest::new(self.next_id(), RequestType::ListTools, json!({}));
-        let response = self.send_request(request).await?;
-        if let ResponseContent::Success { result } = response.response {
-            serde_json::from_value(result)
-                .map_err(|e| ClientError::ToolError(format!("Failed to parse tools list: {}", e)))
-        } else {
-            Err(ClientError::ToolError("Failed to list tools".to_string()))
-        }
-    }
-}
-
 pub struct Protocol {
     // Protect stdin/stdout with a mutex for exclusive access
     inner: Arc<Mutex<Client>>,
@@ -235,6 +140,99 @@ impl Protocol {
             })
         } else {
             Err(ClientError::ToolError("Failed to call tool".to_string()))
+        }
+    }
+    pub fn capable(&self, capability: ServerCapability) -> bool {
+        if let Some(caps) = &self.capabilities {
+            match capability {
+                ServerCapability::Experimental => caps.experimental.is_some(),
+                ServerCapability::Logging => caps.logging.is_some(),
+                ServerCapability::Prompts => caps.prompts.is_some(),
+                ServerCapability::Resources => caps.resources.is_some(),
+                ServerCapability::Tools => caps.tools.is_some(),
+                ServerCapability::Sampling => caps.sampling.is_some(),
+            }
+        } else {
+            false
+        }
+    }
+
+    fn check_capability(&self, capability: ServerCapability) -> Result<(), ClientError> {
+        if self.capable(capability) {
+            Ok(())
+        } else {
+            Err(ClientError::CapabilityError(format!(
+                "Server does not support {:?} capability",
+                capability
+            )))
+        }
+    }
+
+    pub async fn list_prompts(&self) -> Result<Vec<Prompt>, ClientError> {
+        self.check_capability(ServerCapability::Prompts)?;
+        let request = JsonRpcRequest::new(self.next_id(), RequestType::PromptsList, json!({}));
+        let response = self.send_request(request).await?;
+        if let ResponseContent::Success { result } = response.response {
+            serde_json::from_value(result).map_err(|e| {
+                ClientError::PromptError(format!("Failed to parse prompts list: {}", e))
+            })
+        } else {
+            Err(ClientError::PromptError(
+                "Failed to list prompts".to_string(),
+            ))
+        }
+    }
+
+    pub async fn list_resources(&self) -> Result<ResourcesListResponse, ClientError> {
+        self.check_capability(ServerCapability::Resources)?;
+        let request = JsonRpcRequest::new(self.next_id(), RequestType::ResourcesList, json!({}));
+        let response = self.send_request(request).await?;
+        if let ResponseContent::Success { result } = response.response {
+            serde_json::from_value(result).map_err(|e| {
+                ClientError::ResourceError(format!("Failed to parse resources list: {}", e))
+            })
+        } else {
+            Err(ClientError::ResourceError(
+                "Failed to list resources".to_string(),
+            ))
+        }
+    }
+
+    pub async fn read_resources(
+        &self,
+        uris: Vec<String>,
+    ) -> Result<ResourcesReadResponse, ClientError> {
+        self.check_capability(ServerCapability::Resources)?;
+        let request = JsonRpcRequest::new(
+            self.next_id(),
+            RequestType::ResourcesRead,
+            json!({ "uris": uris }),
+        );
+        let response = self.send_request(request).await?;
+        if let ResponseContent::Success { result } = response.response {
+            serde_json::from_value(result).map_err(|e| {
+                ClientError::ResourceError(format!(
+                    "Failed to parse read resources response: {}",
+                    e
+                ))
+            })
+        } else {
+            Err(ClientError::ResourceError(
+                "Failed to read resources".to_string(),
+            ))
+        }
+    }
+
+    pub async fn list_tools(&self) -> Result<ListToolsResponse, ClientError> {
+        self.check_capability(ServerCapability::Tools)?;
+        let request = JsonRpcRequest::new(self.next_id(), RequestType::ListTools, json!({}));
+        let response = self.send_request(request).await?;
+        if let ResponseContent::Success { result } = response.response {
+            dbg!(&result);
+            serde_json::from_value(result)
+                .map_err(|e| ClientError::ToolError(format!("Failed to parse tools list: {}", e)))
+        } else {
+            Err(ClientError::ToolError("Failed to list tools".to_string()))
         }
     }
 }
