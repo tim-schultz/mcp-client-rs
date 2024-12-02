@@ -1,0 +1,7 @@
+update src/protocol.rs so that every request does not return InitializationFailed and has an error type that corresponds to the request.
+
+Update #[derive(Debug)]
+pub enum ClientError {
+    Io(std::io::Error),
+    InitializationFailed(String),
+} if needed

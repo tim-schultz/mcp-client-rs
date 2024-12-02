@@ -1,6 +1,6 @@
-mod client;
-use client::{Client, ClientError};
+mod protocol;
 use dotenv::dotenv;
+use protocol::{ClientError, Protocol};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
 
@@ -14,7 +14,7 @@ async fn main() -> Result<(), ClientError> {
     );
 
     let client = Arc::new(
-        Client::new(
+        Protocol::new(
             "0",
             "npx",
             ["-y", "@modelcontextprotocol/server-github"].to_vec(),
