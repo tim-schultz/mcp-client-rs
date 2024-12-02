@@ -1,8 +1,10 @@
 mod protocol;
+mod types;
 use dotenv::dotenv;
-use protocol::{ClientError, Protocol};
+use protocol::Protocol;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
+use types::ClientError;
 
 #[tokio::main]
 async fn main() -> Result<(), ClientError> {
