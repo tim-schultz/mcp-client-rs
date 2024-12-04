@@ -184,6 +184,32 @@ impl From<serde_json::Error> for ClientError {
     }
 }
 
+use std::fmt;
+
+impl fmt::Display for ClientError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ClientError::Io(err) => write!(f, "I/O error: {}", err),
+            ClientError::InitializationFailed(msg) => write!(f, "Initialization failed: {}", msg),
+            ClientError::ResourceError(msg) => write!(f, "Resource error: {}", msg),
+            ClientError::ToolError(msg) => write!(f, "Tool error: {}", msg),
+            ClientError::PromptError(msg) => write!(f, "Prompt error: {}", msg),
+            ClientError::CapabilityError(msg) => write!(f, "Capability error: {}", msg),
+            ClientError::SerializationError(msg) => write!(f, "Serialization error: {}", msg),
+            ClientError::ProtocolError(msg) => write!(f, "Protocol error: {}", msg),
+        }
+    }
+}
+
+impl std::error::Error for ClientError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            ClientError::Io(err) => Some(err),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Serialize)]
 pub struct JsonRpcRequest<T> {
     jsonrpc: String,
