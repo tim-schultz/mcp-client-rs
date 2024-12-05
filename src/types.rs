@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use url::Url;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,10 +26,12 @@ pub struct ResourcesReadResponse {
     pub meta: Option<HashMap<String, serde_json::Value>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ResourceContents {
-    pub uri: String,
-    pub content: String,
+    pub uri: Url,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mime_type: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -48,22 +51,39 @@ pub struct Resource {
     pub resource_type: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ListToolsResponse {
     pub tools: Vec<Tool>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
 pub struct Tool {
     pub name: String,
     pub description: String,
-    pub inputSchema: serde_json::Value,
+    #[serde(rename(deserialize = "inputSchema"))]
+    pub input_schema: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CallToolResponse {
-    #[serde(rename = "toolResult")]
-    pub result: serde_json::Value,
+    pub content: Vec<ToolResponseContent>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_error: Option<bool>,
+    #[serde(rename = "_meta", skip_serializing_if = "Option::is_none")]
+    pub meta: Option<HashMap<String, serde_json::Value>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum ToolResponseContent {
+    #[serde(rename = "text")]
+    Text { text: String },
+    #[serde(rename = "image")]
+    Image { data: String, mime_type: String },
+    #[serde(rename = "resource")]
+    Resource { resource: ResourceContents },
 }
 
 #[derive(Debug, Deserialize)]

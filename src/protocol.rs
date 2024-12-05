@@ -134,7 +134,6 @@ impl Protocol {
         let response = self.send_request(request).await?;
 
         if let ResponseContent::Success { result } = response.response {
-            dbg!(&result);
             serde_json::from_value(result).map_err(|e| {
                 ClientError::ToolError(format!("Failed to parse tool response: {}", e))
             })
@@ -228,7 +227,6 @@ impl Protocol {
         let request = JsonRpcRequest::new(self.next_id(), RequestType::ListTools, json!({}));
         let response = self.send_request(request).await?;
         if let ResponseContent::Success { result } = response.response {
-            dbg!(&result);
             serde_json::from_value(result)
                 .map_err(|e| ClientError::ToolError(format!("Failed to parse tools list: {}", e)))
         } else {
