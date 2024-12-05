@@ -1,4 +1,4 @@
-# MCP Protocol Client
+# MCP Protocol Client - Very Much a WIP
 
 Rust client implementation for the [Model Context Protocol](https://github.com/modelcontextprotocol) - a structured communication protocol between language models and external tools.
 
