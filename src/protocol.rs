@@ -3,11 +3,11 @@ use crate::types::{
     JsonRpcRequest, JsonRpcResponse, ListToolsResponse, Prompt, RequestType, ResourcesListResponse,
     ResourcesReadResponse, ResponseContent, ServerCapabilities, ServerCapability, ToolCallParams,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::json;
 use std::{
     collections::HashMap,
-    process::{Child, Command, Stdio},
+    process::Stdio,
     sync::{
         atomic::{AtomicU64, Ordering},
         Arc,

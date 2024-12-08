@@ -14,3 +14,4 @@ serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }
 dotenv = "0.15.0"
 url = {version = "2.2", features = ["serde"]}
+anyhow = "1.0.94"
